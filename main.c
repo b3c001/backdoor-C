@@ -10,8 +10,8 @@ int main() {
     int sock;
     struct sockaddr_in addr;
     char buffer;
-    const char *ip = "192.168.1.100"; // trocar ip
-    int port = 4444; // trocar porta
+    const char *ip = "54.232.216.110"; // trocar ip
+    int port = 16499; // trocar porta
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock < 0) {
