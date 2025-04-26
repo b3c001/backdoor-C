@@ -35,7 +35,7 @@ int main() {
 
     // Copiar o binário para /usr/bin/
     char cmd[512];
-    snprintf(cmd, sizeof(cmd), "sudo cp %s /usr/bin/bico && sudo chmod +x /usr/bin/bico", __FILE__);
+    snprintf(cmd, sizeof(cmd), "sudo cp ./bico /usr/bin/bico && sudo chmod +x /usr/bin/bico");
     system(cmd);
 
     // Criar o arquivo de serviço
