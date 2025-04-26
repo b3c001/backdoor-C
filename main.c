@@ -34,7 +34,7 @@ int main() {
     FILE *file = fopen("/tmp/bico.service", "w");
     if (file) {
         fprintf(file, "[Unit]\nDescription=bico service\nAfter=network.target\n\n");
-        fprintf(file, "[Service]\nExecStart=%s\nRestart=always\nUser=root\nStandardOutput=null\nStandardError=null\nRestartSec=5\n\n", __FILE__);
+        fprintf(file, "[Service]\nType=forking\nExecStart=/full/path/to/bico\nRestart=always\nUser=root\nStandardOutput=journal\nStandardError=journal\nRestartSec=5\n\n", __FILE__);
         fprintf(file, "[Install]\nWantedBy=multi-user.target\n");
         fclose(file);
 
