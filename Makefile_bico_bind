@@ -1,0 +1,11 @@
+CC = gcc
+CFLAGS = -Wall -g
+LDFLAGS =
+
+all: bico_bind
+
+bico_bind: bico_bind.c
+	$(CC) $(CFLAGS) bico_bind.c -o bico_bind $(LDFLAGS)
+
+clean:
+	rm -f bico_bind
