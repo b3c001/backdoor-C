@@ -74,7 +74,7 @@ Atenção: Este projeto foi criado **somente para fins educacionais** e **não d
 Não nos responsabilizamos por qualquer dano, perda de dados ou comprometimento de sistemas decorrentes do uso indevido deste código. O autor do código (b3c001) e os colaboradores deste repositório não são responsáveis por qualquer consequência legal ou técnica resultante da execução deste código fora de um ambiente controlado e autorizado.
 
 # Licença
-Este projeto é licenciado sob a Licença GPL-3.0. Para mais informações, consulte o arquivo [LICENSE](LICENSE.)
+Este projeto é licenciado sob a Licença GPL-3.0. Para mais informações, consulte o arquivo [LICENSE](LICENSE).
 
 # Contribuições
 Contribuições para aprimorar a documentação ou corrigir bugs são bem-vindas. Para contribuições, siga as diretrizes de contribuição do repositório.
