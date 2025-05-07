@@ -3,6 +3,7 @@
 ## Descrição
 
 O **Bico LKM** é um módulo de kernel do Linux (LKM - Loadable Kernel Module) criado como um exercício didático para demonstrar técnicas de escalonamento de privilégios, ocultação de processos e conexões de rede, e como backdoors podem ser implementados a partir do kernel.
+Este programa não tem a intenção de ser utilizado em ambientes práticos, e sim servir como uma prova de conceito didática, é um código para quem quer entender as técnicas que um atacante pode usar se esconder e obter um alto controle de um sistema linux, apartir de funções do kernel. ou para quem quer começar seu próprio lkm
 
 ## Funcionalidades
 
@@ -11,6 +12,7 @@ O módulo intercepta a syscall `kill`, permitindo que qualquer processo envie um
 
 ### 2. **Ocultação de Conexões TCP**
 Ao modificar a função de exibição de conexões TCP do kernel (`tcp4_seq_show`), o módulo oculta conexões na porta `4444` para evitar que sejam visíveis em ferramentas como `netstat`.
+Esse método é muito mais barulhento e mais antigo, Existe jeito novo de se fazer essa ocultação para ser mais stealth, isso dimunui a compatibilidade, prossegui dessa forma visto que esse programa tem a intenção de ser universal. 
 
 ### 3. **Backdoor via Bind Shell**
 O código `bico_bind.c` implementa um servidor que escuta na porta `4444`. Quando a senha correta ("bicopass") é fornecida, um shell com privilégios de root é executado.
@@ -22,10 +24,8 @@ O módulo pode ser configurado para reiniciar automaticamente como um serviço a
 
 ### Pré-requisitos
 
-- Um sistema Linux com permissões de administrador (root).
-- O módulo deve ser carregado em um **ambiente controlado** para fins educacionais.
-- Ferramentas como `make` para compilar o módulo e os arquivos relacionados.
-
+- Um sistema GNU/Linux com permissões de administrador (root).
+- `GCC` , `make` para compilar o módulo e os arquivos relacionados.
 ### Passos
 
 1. **Clone o Repositório**
